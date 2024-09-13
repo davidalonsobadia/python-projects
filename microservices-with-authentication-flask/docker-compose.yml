@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  authentication_service:
+    build: ./authentication_service
+    expose:
+      - "5001"  # Expose internally to the Docker network, not to the host machine
+    networks:
+      - app-network
+
+  user_service:
+    build: ./user_service
+    expose:
+      - "5002"
+    networks:
+      - app-network
+
+  address_service:
+    build: ./address_service
+    expose:
+      - "5003"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Mount the NGINX configuration
+    ports:
+      - "80:80"  # Expose NGINX on port 80 to your local machine
+    depends_on:
+      - authentication_service
+      - user_service
+      - address_service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
